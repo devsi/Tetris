@@ -132,7 +132,6 @@ var Tetris = (function () {
      * Perform a shape rotation
      */
     function rotate(shape, newPivot) {
-
         // calculate rotation cycle.
         let target = (shape.pivot + newPivot) % 4;
         if (target < 0) { target = 3; }
@@ -182,10 +181,32 @@ var Tetris = (function () {
         let ubounds = shapeUpperBounds(shape);
         if (shape.locked || ubounds['x'] === Grid.rows - 1) {
             shape.locked = true;
-            locked.push(shape);
+            //locked.push(shape);
+
+            // clear line
+            lineclear();
+
             active = null;
             speed = 1;
             newShape(0, 3);
+        }
+    }
+
+    /**
+     * Checks the locked pieces, and clears a line if it matches.
+     */
+    function lineclear() {
+        for (var row in map) {
+            let count = 0;
+            for (var col in map[row]) { if (map[row][col] > 0) { count ++; }  }
+
+            if (count >= Grid.columns) {
+                let size = Grid.columns;
+                map.splice(row, 1);
+
+                map.unshift([]);
+                while (size--) map[0].push(0);
+            }
         }
     }
 
@@ -394,17 +415,19 @@ var Tetris = (function () {
     function onkeydown(e) {
         if (active) {
             if (e.keyCode === 37) {
-                move(active, active.x, active.y - 1);
+                move(active, active.x, active.y - 1); // move left
             } else if (e.keyCode === 39) {
-                move(active, active.x, active.y + 1);
+                move(active, active.x, active.y + 1); // move right
             } else if (e.keyCode === 40) {
-                move(active, active.x + 1, active.y);
+                move(active, active.x + 1, active.y); // move down
+            } else if (e.keyCode === 38) {
+                rotate(active, +1); // rotate clockwise
             } else if (e.keyCode === 32) {
-                speed = 0.01;
+                speed = 0.01; // hard drop
             } else if (e.keyCode === 81) {
-                rotate(active, -1);
+                rotate(active, -1); // rotate counter-clockwise
             } else if (e.keyCode === 69) {
-                rotate(active, +1);
+                rotate(active, +1); // rotate clockwise
             }
         }
     }
